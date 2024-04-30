@@ -15,7 +15,9 @@ class SuperAdmin extends Controller
    public function index() {
      
       $user = $this->dModel->dynamicCheckExist(['client_id' => 1], 'users');
-      dd($user);
+      foreach ($user as $key => $value) {
+       dd($value);
+      }
     return view('layout/super-admin/super-admin-home');
    }
 }

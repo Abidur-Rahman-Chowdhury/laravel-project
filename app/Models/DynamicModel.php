@@ -61,7 +61,7 @@ class DynamicModel extends Model
     // }
     public function dynamicCheckExist(array $where, string $table)
     {
-        dd($this->db);
+      
        $query = $this->db->table($table);
        $query->where($where);
        return $query->select()->get()->toArray();
