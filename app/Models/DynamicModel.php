@@ -76,4 +76,59 @@ class DynamicModel extends Model
     {
         return DB::table($table)->insertGetId($data);
     }
+    public static function validateEmailOrPhone($content): ?array
+    {
+        if (filter_var($content, FILTER_VALIDATE_EMAIL)) {
+            return [
+                'type' => 'email',
+                'content' => $content
+            ];
+        }
+
+        if (preg_match("/(^(\+8801|8801|01|1))[1|3-9]{1}(\d){8}$/", $content)) {
+
+            $phone = self::formatPhone($content);
+            return [
+                'type' => 'phone',
+                'content' => $phone
+            ];
+        }
+
+        return [];
+    }
+    public static function formatPhone($phone)
+    {
+        return "880" . substr($phone, -10);
+    }
+    function validatePassword($password)
+    {
+        $hasSpecialChar = preg_match('/[!@#$%^&*()_+\-=\[\]{}|;:\'",.<>\/?]/', $password);
+        $hasNumber = preg_match('/[0-9]/', $password);
+        $hasString = preg_match('/[a-zA-Z]/', $password);
+        $isMinLength = strlen($password) >= 8;
+        if ($hasSpecialChar && $hasNumber && $hasString && $isMinLength) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public function falseReturn($route, $message, $rollback = false)
+    {
+        if ($rollback) {
+            $this->db->transRollback();
+        }
+        $ssData = ['sfmsg' => $message, 'sstatus' => 'red'];
+        session()->set($ssData);
+        return rtrim(base_url(), '/') . $route;
+    }
+
+    public function successReturn($route, $message, $commit = false)
+    {
+        if ($commit) {
+            $this->db->transCommit();
+        }
+        $ssData = ['sfmsg' => $message, 'sstatus' => 'green'];
+        session()->set($ssData);
+        return rtrim(base_url(), '/') . $route;
+    }
 }
